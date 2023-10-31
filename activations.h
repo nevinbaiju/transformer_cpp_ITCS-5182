@@ -1,0 +1,1 @@
+float* relu(float input[], int size, bool inplace = false);
