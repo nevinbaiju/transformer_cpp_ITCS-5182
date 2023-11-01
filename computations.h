@@ -1,0 +1,1 @@
+float** matmul(float **input, int inp_rows, int inp_cols, float **weights, int w_rows, int w_cols);

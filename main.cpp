@@ -3,20 +3,29 @@
 #include "activations.h"
 #include "initializations.h"
 #include "helpers.h"
+#include "computations.h"
 
 int main() {
-    float *input = new float[10];
-    float *result;
-    int size=10;
+    int inp_row = 1, inp_col=10;
+    int w_row = 11, w_col=5;
 
-    for(int i=0; i<10; i++){
-        input[i] = -5+i;
+    float **weight = new float*[w_row];
+    for(int i=0; i<w_row; i++){
+        weight[i] = new float[w_col];
     }
+    float **input = new float*[inp_row];
+    for(int i=0; i<inp_row; i++){
+        input[i] = new float[inp_col];
+    }
+    
+    setOneInit(weight, w_row, w_col);
+    setOneInit(input, inp_row, inp_col);
 
-    print_arr(input, size);
-    result = relu(input, size, false);
-    print_arr(input, size);
-    print_arr(result, size);
+    print_arr(weight, w_row, w_col);
+    print_arr(input, inp_row, inp_col);
+    
+    matmul(input, inp_row, inp_col, weight, w_row, w_col);
+    
 
     return 0;
 }
