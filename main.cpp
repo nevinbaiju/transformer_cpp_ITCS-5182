@@ -24,7 +24,9 @@ int main() {
     print_arr(weight, w_row, w_col);
     print_arr(input, inp_row, inp_col);
     
-    matmul(input, inp_row, inp_col, weight, w_row, w_col);
+    float **result;
+    result = matmul(input, inp_row, inp_col, weight, w_row, w_col);
+    print_arr(result, inp_row, w_col);
     
 
     return 0;
