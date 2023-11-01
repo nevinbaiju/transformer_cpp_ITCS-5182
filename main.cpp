@@ -7,7 +7,7 @@
 
 int main() {
     int inp_row = 1, inp_col=10;
-    int w_row = 11, w_col=5;
+    int w_row = inp_col, w_col=5;
 
     float **weight = new float*[w_row];
     for(int i=0; i<w_row; i++){
