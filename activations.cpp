@@ -3,8 +3,10 @@
 #include "activations.h"
 
 float* relu(float input[], int size, bool inplace) {
-    float* result = new float[size];
-
+    float* result;
+    if(!inplace){
+        result = new float[size];
+    }
     for (int i = 0; i < size; ++i) {
         if (inplace) {
             input[i] = std::max(input[i], 0.0f);
