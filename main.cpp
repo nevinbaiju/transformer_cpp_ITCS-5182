@@ -5,8 +5,8 @@
 #include "helpers.h"
 #include "computations.h"
 
-int main() {
-    int inp_row = 1, inp_col=10;
+int main(int argc, char *argv[]) {
+    int inp_row = atoi(argv[1]), inp_col=atoi(argv[2]);
     int w_row = inp_col, w_col=5;
 
     float **weight = new float*[w_row];
