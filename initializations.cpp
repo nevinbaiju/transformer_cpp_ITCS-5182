@@ -18,9 +18,10 @@ void kaimingInit(float** array, int rows, int cols, int fan_in) {
 }
 
 void setOneInit(float* array, int rows, int cols, int val) {
+    std::cout << "Setting val: " << val << std::endl;
     for (int i = 0; i <rows; ++i) {
         for (int j = 0; j < cols; ++j) {
-            array[i*rows+j] = val;
+            array[i*cols+j] = val;
         }
     }
 }

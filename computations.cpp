@@ -10,9 +10,9 @@ float* matmul(float *input, int inp_rows, int inp_cols, float *weights, int w_ro
 
     for (int i = 0; i < inp_rows; i++) {
         for (int j = 0; j < w_cols; j++) {
-            result[i*inp_rows + j] = 0.0;
+            result[i*w_cols + j] = 0.0;
             for (int k = 0; k < inp_cols; k++) {
-                result[i*inp_rows + j] += input[i*inp_rows + k] * weights[k*w_rows + j];
+                result[i*w_cols + j] += input[i*inp_cols + k] * weights[k*w_cols + j];
             }
         }
     }
