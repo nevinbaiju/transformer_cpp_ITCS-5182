@@ -17,10 +17,10 @@ void kaimingInit(float** array, int rows, int cols, int fan_in) {
     }
 }
 
-void setOneInit(float** array, int rows, int cols, int val) {
-    for (int i = 0; i < rows; ++i) {
+void setOneInit(float* array, int rows, int cols, int val) {
+    for (int i = 0; i <rows; ++i) {
         for (int j = 0; j < cols; ++j) {
-            array[i][j] = val;
+            array[i*rows+j] = val;
         }
     }
 }
