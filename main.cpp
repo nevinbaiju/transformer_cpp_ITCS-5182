@@ -20,6 +20,7 @@ int main(int argc, char *argv[]) {
     
     float *result;
     result = matmul(input, inp_row, inp_col, weight, w_row, w_col);
+    result = softmax(result, inp_row, w_col, false);
     print_arr(result, inp_row, w_col);
     
 
