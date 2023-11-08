@@ -19,7 +19,7 @@ main.o: main.cpp activations.h
 	$(CXX) $(CXXFLAGS) -c main.cpp
 
 run:
-	./run_transformer
+	./run_transformer 10 1 5
 
 clean:
 	rm -f $(OBJS) $(EXEC)
