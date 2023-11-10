@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -std=c++11
 
-SRCS = main.cpp activations.cpp initializations.cpp helpers.cpp computations.cpp exceptions.cpp
+SRCS = main.cpp activations.cpp initializations.cpp helpers.cpp computations.cpp exceptions.cpp attention.cpp
 OBJS = $(SRCS:.cpp=.o)
 EXEC = run_transformer
 
@@ -19,7 +19,7 @@ main.o: main.cpp activations.h
 	$(CXX) $(CXXFLAGS) -c main.cpp
 
 run:
-	./run_transformer
+	./run_transformer 10 1 5
 
 clean:
 	rm -f $(OBJS) $(EXEC)

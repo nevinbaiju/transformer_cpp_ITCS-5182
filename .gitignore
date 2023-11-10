@@ -1,2 +1,4 @@
 *.o
 run_transformer
+.ipynb_checkpoints
+test.ipynb

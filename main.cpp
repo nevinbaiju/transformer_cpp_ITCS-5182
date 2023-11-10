@@ -4,30 +4,20 @@
 #include "initializations.h"
 #include "helpers.h"
 #include "computations.h"
+#include "attention.h"
 
 int main(int argc, char *argv[]) {
-    int inp_row = atoi(argv[1]), inp_col=atoi(argv[2]);
-    int w_row = inp_col, w_col=5;
+    int rows = 4, cols = 4;
 
-    float **weight = new float*[w_row];
-    for(int i=0; i<w_row; i++){
-        weight[i] = new float[w_col];
-    }
-    float **input = new float*[inp_row];
-    for(int i=0; i<inp_row; i++){
-        input[i] = new float[inp_col];
-    }
-    
-    setOneInit(weight, w_row, w_col);
-    setOneInit(input, inp_row, inp_col);
+    float *input_arr1 = new float[rows*cols];
+    float *input_arr2 = new float[rows*cols];
+    float *input_arr3 = new float[rows*cols];
+    sequentialInit(input_arr1, rows, cols);
+    sequentialInit(input_arr2, rows, cols);
+    sequentialInit(input_arr3, rows, cols);
 
-    print_arr(weight, w_row, w_col);
-    print_arr(input, inp_row, inp_col);
-    
-    float **result;
-    result = matmul(input, inp_row, inp_col, weight, w_row, w_col);
-    print_arr(result, inp_row, w_col);
-    
-
-    return 0;
+    float *result = dot_product_attention(input_arr1, rows, cols,
+                                          input_arr2, rows, cols,
+                                          input_arr3, rows, cols);    
+    print_arr(result, rows, cols);                                                
 }
