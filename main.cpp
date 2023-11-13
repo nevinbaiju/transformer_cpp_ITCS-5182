@@ -7,7 +7,7 @@
 #include "attention.h"
 
 int main(int argc, char *argv[]) {
-    int rows = 4, cols = 4;
+    int rows = 2, cols = 4;
 
     float *input_arr1 = new float[rows*cols];
     float *input_arr2 = new float[rows*cols];
@@ -15,9 +15,9 @@ int main(int argc, char *argv[]) {
     sequentialInit(input_arr1, rows, cols);
     sequentialInit(input_arr2, rows, cols);
     sequentialInit(input_arr3, rows, cols);
-
-    float *result = dot_product_attention(input_arr1, rows, cols,
-                                          input_arr2, rows, cols,
-                                          input_arr3, rows, cols);    
-    print_arr(result, rows, cols);                                                
+    
+    print_arr(input_arr1, rows, cols);
+    float **result = vertical_split(input_arr1, rows, cols, 2);  
+    print_arr(result[0], rows, 2);      
+    print_arr(result[1], rows, 2);                                                
 }
