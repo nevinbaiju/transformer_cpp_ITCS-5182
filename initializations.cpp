@@ -51,3 +51,26 @@ float *transpose(float* array, int rows, int cols, bool inplace) {
         return result;
     }
 }
+
+float** vertical_split(float *matrix, int rows, int cols, int num_splits) {
+
+    int splitSize = cols / num_splits;
+
+    // Allocate memory for the result array
+    float **result = new float*[num_splits];
+    for (int i = 0; i < num_splits; ++i) {
+        result[i] = new float[rows * splitSize];
+    }
+
+    // Perform vertical splits
+    for (int i = 0; i < num_splits; ++i) {
+        int col_offset = i * splitSize;
+        for (int row = 0; row < rows; ++row) {
+            for (int col = 0; col < splitSize; ++col) {
+                result[i][row * splitSize + col] = matrix[row * cols + col_offset + col];
+            }
+        }
+    }
+
+    return result;
+}
