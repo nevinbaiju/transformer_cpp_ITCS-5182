@@ -41,10 +41,12 @@ float* relu(float *input, int rows, int cols, bool inplace) {
 }
 
 void _softmax(float *input, int start_index, int end_index){
-    double sum_val=0;
-
+    float max_val=input[start_index], sum_val=0;
+    for(int i=start_index+1; i<end_index; i++){
+        max_val = std::max(max_val, input[i]);
+    }
     for(int i=start_index; i<end_index; i++){
-        input[i] = exp(input[i]);
+        input[i] = exp(input[i] - max_val);
         sum_val += input[i];
     }
     for(int i=start_index; i<end_index; i++){
