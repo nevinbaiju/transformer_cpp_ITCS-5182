@@ -17,6 +17,12 @@ void kaimingInit(float** array, int rows, int cols, int fan_in) {
     }
 }
 
+void identityInit(float *array, int rows, int cols){
+    for(int i=0; i<rows; i++){
+        array[i*cols + i] = 1;
+    }
+}
+
 void sequentialInit(float *array, int rows, int cols){
     for(int i=0; i<rows*cols; i++){
         array[i] = i+1;
@@ -24,7 +30,6 @@ void sequentialInit(float *array, int rows, int cols){
 }
 
 void setOneInit(float* array, int rows, int cols, int val) {
-    std::cout << "Setting val: " << val << std::endl;
     for (int i = 0; i <rows; ++i) {
         for (int j = 0; j < cols; ++j) {
             array[i*cols+j] = val;
@@ -52,6 +57,7 @@ float *transpose(float* array, int rows, int cols, bool inplace) {
     }
 }
 
+// Need to change this to 1D
 float** vertical_split(float *matrix, int rows, int cols, int num_splits) {
 
     int splitSize = cols / num_splits;
