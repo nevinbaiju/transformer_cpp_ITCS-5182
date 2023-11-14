@@ -7,17 +7,20 @@
 #include "attention.h"
 
 int main(int argc, char *argv[]) {
-    int rows = 2, cols = 4;
+    int rows = 100, cols = 1000000;
 
-    float *input_arr1 = new float[rows*cols];
-    float *input_arr2 = new float[rows*cols];
-    float *input_arr3 = new float[rows*cols];
-    sequentialInit(input_arr1, rows, cols);
-    sequentialInit(input_arr2, rows, cols);
-    sequentialInit(input_arr3, rows, cols);
-    
-    print_arr(input_arr1, rows, cols);
-    float **result = vertical_split(input_arr1, rows, cols, 2);  
-    print_arr(result[0], rows, 2);      
-    print_arr(result[1], rows, 2);                                                
+    float *arr1 = new float[rows*cols];
+    float *arr2 = new float[rows*cols];
+    float *arr3 = new float[rows*cols];
+
+    sequentialInit(arr1, rows, cols);
+    sequentialInit(arr2, rows, cols);
+    sequentialInit(arr3, rows, cols);
+
+    float *result = multi_head_attention(arr1, rows, cols,
+                                        arr2, rows, cols,
+                                        arr3, rows, cols, 
+                                        4, rows, false);
+
+    // print_arr(result, rows, cols);                                        
 }
