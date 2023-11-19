@@ -7,31 +7,24 @@
 #include "helpers.h"
 #include "computations.h"
 #include "attention.h"
+#include "Tensor.h"
 
 int main(int argc, char *argv[]) {
-    int rows = atoi(argv[1]), cols = atoi(argv[2]);
-    int embedding = cols;
-    int num_heads = atoi(argv[3]);
+    Tensor tensor(3, 4);
 
-    float *arr1 = new float[rows*cols];
-    float *arr2 = new float[rows*cols];
-    float *arr3 = new float[rows*cols];
+    tensor.kaimingInit(3);
+    std::cout << "Kaiming Initialization:" << std::endl;
+    std::cout << tensor << std::endl;
 
-    sequentialInit(arr1, rows, cols);
-    sequentialInit(arr2, rows, cols);
-    sequentialInit(arr3, rows, cols);
+    tensor.identityInit();
+    std::cout << "\nIdentity Initialization:" << std::endl;
+    std::cout << tensor << std::endl;
 
-    auto start = std::chrono::high_resolution_clock::now();
-    float *result = multi_head_attention(arr1, rows, cols,
-                                        arr2, rows, cols,
-                                        arr3, rows, cols, 
-                                        4, rows, false);
-    auto end = std::chrono::high_resolution_clock::now();                                        
+    tensor.sequentialInit();
+    std::cout << "\nSequential Initialization:" << std::endl;
+    std::cout << tensor << std::endl;
 
-    get_bench_results(rows, cols, embedding, num_heads, start, end);  
-
-    delete[] arr1;
-    delete[] arr2;
-    delete[] arr3;
-    delete[] result;                                 
+    tensor.setOneInit(5.0f);
+    std::cout << "\nSet One Initialization:" << std::endl;
+    std::cout << tensor << std::endl;
 }
