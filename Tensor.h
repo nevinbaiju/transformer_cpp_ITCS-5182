@@ -13,6 +13,7 @@ public:
     void identityInit();
     void sequentialInit();
     void setOneInit(float val);
+    void transpose();
     Tensor operator*(const Tensor& other) const; 
 
     friend std::ostream& operator<<(std::ostream& os, const Tensor& tensor);

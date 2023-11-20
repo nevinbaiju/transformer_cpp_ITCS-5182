@@ -76,3 +76,20 @@ Tensor Tensor::operator*(const Tensor& other) const {
 
     return result;
 }
+
+void Tensor::transpose() {
+    float temp;
+    float *result = new float[rows*cols];
+    
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            result[j*rows + i] = data[i*cols + j];
+        }
+    }
+    delete[] data;
+    data = result;
+
+    temp = rows;
+    rows = cols;
+    cols = temp;
+}
