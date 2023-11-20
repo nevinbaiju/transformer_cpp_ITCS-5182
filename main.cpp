@@ -10,21 +10,12 @@
 #include "Tensor.h"
 
 int main(int argc, char *argv[]) {
-    Tensor tensor(3, 4);
+    Tensor tensor1(3, 4);
+    tensor1.setOneInit(1);
+    Tensor tensor2(4, 4);
+    tensor2.setOneInit(1);
 
-    tensor.kaimingInit(3);
-    std::cout << "Kaiming Initialization:" << std::endl;
-    std::cout << tensor << std::endl;
+    Tensor result = tensor1 * tensor2;
 
-    tensor.identityInit();
-    std::cout << "\nIdentity Initialization:" << std::endl;
-    std::cout << tensor << std::endl;
-
-    tensor.sequentialInit();
-    std::cout << "\nSequential Initialization:" << std::endl;
-    std::cout << tensor << std::endl;
-
-    tensor.setOneInit(5.0f);
-    std::cout << "\nSet One Initialization:" << std::endl;
-    std::cout << tensor << std::endl;
+    std::cout << result << std::endl;
 }
