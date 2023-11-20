@@ -76,6 +76,12 @@ Tensor Tensor::operator*(const Tensor& other) const {
 
     return result;
 }
+Tensor::Tensor(const Tensor& other) : rows(other.rows), cols(other.cols) {
+        // Allocate memory for data
+        data = new float[rows * cols];
+        // Copy data from the other tensor
+        std::memcpy(data, other.data, sizeof(float) * rows * cols);
+}
 
 void Tensor::transpose() {
     float temp;

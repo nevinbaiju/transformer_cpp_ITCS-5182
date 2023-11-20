@@ -14,7 +14,8 @@ public:
     void sequentialInit();
     void setOneInit(float val);
     void transpose();
-    Tensor operator*(const Tensor& other) const; 
+    Tensor operator*(const Tensor& other) const;
+    Tensor(const Tensor& other); 
 
     friend std::ostream& operator<<(std::ostream& os, const Tensor& tensor);
 
