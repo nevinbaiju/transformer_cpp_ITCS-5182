@@ -1,3 +1,6 @@
+#ifndef TENSOR_H
+#define TENSOR_H
+
 #include <iostream>
 
 class Tensor {
@@ -8,6 +11,7 @@ public:
     int rows;
     int cols;
     int size;
+    float* data;
 
     void kaimingInit(int fan_in);
     void identityInit();
@@ -18,7 +22,6 @@ public:
     Tensor(const Tensor& other); 
 
     friend std::ostream& operator<<(std::ostream& os, const Tensor& tensor);
-
-private:
-    float* data;
 };
+
+#endif

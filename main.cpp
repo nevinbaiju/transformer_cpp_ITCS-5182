@@ -11,13 +11,9 @@
 
 int main(int argc, char *argv[]) {
     Tensor tensor1(3, 4);
-    tensor1.sequentialInit();
+    tensor1.setOneInit(-1);
+    Tensor res = softmax(tensor1);
+    res.transpose();
 
-    // Using copy constructor to create tensor2 as a copy of tensor1
-    Tensor tensor2 = tensor1;
-    tensor2.transpose();
-    // Displaying the content of tensor1 and tensor2 to show they are separate entities
-    std::cout << tensor1 << std::endl;
-
-    std::cout << tensor2 << std::endl;
+    std::cout << res << std::endl;
 }

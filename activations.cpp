@@ -1,6 +1,7 @@
 #include <iostream>
 #include <math.h>
 #include <cstring>
+#include "Tensor.h"
 #include "activations.h"
 
 float* relu(float input[], int size, bool inplace) {
@@ -40,6 +41,22 @@ float* relu(float *input, int rows, int cols, bool inplace) {
     return result;
 }
 
+Tensor relu(Tensor &mat, bool inplace) {
+    Tensor *result;
+    if(inplace){
+        result = &mat;
+    }
+    else{
+        result = new Tensor(mat.rows, mat.cols);
+        std::memcpy(result->data, mat.data, sizeof(float) * mat.size);
+    }
+    for (int i = 0; i < result->size; ++i) {
+        result->data[i] = std::max(result->data[i], 0.0f);
+    }
+
+    return *result;
+}
+
 void _softmax(float *input, int start_index, int end_index){
     float max_val=input[start_index], sum_val=0;
     for(int i=start_index+1; i<end_index; i++){
@@ -71,6 +88,24 @@ float* softmax(float *input, int rows, int cols, bool inplace){
     }
 
     return result;
+}
+
+Tensor softmax(Tensor &mat, bool inplace){
+    Tensor *result;
+
+    if (inplace){
+        result = &mat;
+    }
+    else{
+        result = new Tensor(mat.rows, mat.cols);
+        std::memcpy(result->data, mat.data, sizeof(float) * mat.size);
+    }
+    int i, j;
+    for(i=0; i<result->rows; i++){
+        _softmax(result->data, i*result->cols, (i+1)*result->cols);
+    }
+
+    return *result;
 }
 
 float* scale(float *input, int rows, int cols, bool inplace){
