@@ -124,3 +124,22 @@ float* scale(float *input, int rows, int cols, bool inplace){
 
     return result;
 }
+
+Tensor scale(Tensor &mat, bool inplace) {
+    Tensor *result;
+
+    if (inplace) {
+        result = &mat;
+    } else {
+        result = new Tensor(mat.rows, mat.cols);
+        std::memcpy(result->data, mat.data, sizeof(float) * mat.size);
+    }
+
+    float scale = std::sqrt(result->cols);
+
+    for (int i = 0; i < result->size; ++i) {
+        result->data[i] /= scale;
+    }
+
+    return *result;
+}
