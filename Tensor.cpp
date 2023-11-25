@@ -99,3 +99,25 @@ void Tensor::transpose() {
     rows = cols;
     cols = temp;
 }
+
+// Need to change this to 1D
+Tensor** Tensor::vertical_split(int num_splits) {
+
+    int splitSize = cols / num_splits;
+    
+    Tensor **result = new Tensor*[num_splits];
+    for (int i = 0; i < num_splits; ++i) {
+        result[i] = new Tensor(rows, splitSize);
+    }
+    
+    for (int i = 0; i < num_splits; ++i) {
+        int col_offset = i * splitSize;
+        for (int row = 0; row < rows; ++row) {
+            for (int col = 0; col < splitSize; ++col) {
+                result[i]->data[row * splitSize + col] = data[row * cols + col_offset + col];
+            }
+        }
+    }
+
+    return result;
+}

@@ -19,6 +19,7 @@ public:
     void setOneInit(float val);
     void transpose();
     Tensor operator*(const Tensor& other) const;
+    Tensor** vertical_split(int num_splits);
     Tensor(const Tensor& other); 
 
     friend std::ostream& operator<<(std::ostream& os, const Tensor& tensor);
