@@ -12,7 +12,10 @@ Tensor::Tensor(int rows, int cols) : rows(rows), cols(cols), size(rows * cols) {
 }
 
 Tensor::~Tensor() {
-    delete[] data;
+    if (data != nullptr){
+        delete[] data;
+        data = nullptr;
+    }
 }
 
 void Tensor::kaimingInit(int fan_in) {
@@ -61,13 +64,11 @@ Tensor Tensor::operator*(const Tensor& other) const {
     if (cols != other.rows) {
         throw SizeMismatchException(rows, cols, other.rows, other.cols);
     }
-
     Tensor result(rows, other.cols);
-    // std::cout << "ivide" << std::endl;
 
     for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < other.rows; j++) {
-            result.data[i * other.rows + j] = 0.0;
+        for (int j = 0; j < cols; j++) {
+            result.data[i * other.cols + j] = 0.0;
             for (int k = 0; k < cols; k++) {
                 result.data[i * other.cols + j] += data[i * cols + k] * other.data[k * other.cols + j];
             }
@@ -76,11 +77,8 @@ Tensor Tensor::operator*(const Tensor& other) const {
 
     return result;
 }
-Tensor::Tensor(const Tensor& other) : rows(other.rows), cols(other.cols) {
-        // Allocate memory for data
-        data = new float[rows * cols];
-        // Copy data from the other tensor
-        std::memcpy(data, other.data, sizeof(float) * rows * cols);
+Tensor::Tensor(const Tensor& other) : rows(other.rows), cols(other.cols), size(other.size) {
+        std::memcpy(data, other.data, sizeof(float) * size);
 }
 
 void Tensor::transpose() {
