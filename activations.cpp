@@ -90,7 +90,7 @@ float* softmax(float *input, int rows, int cols, bool inplace){
     return result;
 }
 
-Tensor softmax(Tensor &mat, bool inplace){
+Tensor* softmax(Tensor &mat, bool inplace){
     Tensor *result;
 
     if (inplace){
@@ -105,7 +105,7 @@ Tensor softmax(Tensor &mat, bool inplace){
         _softmax(result->data, i*result->cols, (i+1)*result->cols);
     }
 
-    return *result;
+    return result;
 }
 
 float* scale(float *input, int rows, int cols, bool inplace){
@@ -125,7 +125,7 @@ float* scale(float *input, int rows, int cols, bool inplace){
     return result;
 }
 
-Tensor scale(Tensor &mat, bool inplace) {
+Tensor* scale(Tensor &mat, bool inplace) {
     Tensor *result;
 
     if (inplace) {
@@ -135,11 +135,11 @@ Tensor scale(Tensor &mat, bool inplace) {
         std::memcpy(result->data, mat.data, sizeof(float) * mat.size);
     }
 
-    float scale = std::sqrt(result->cols);
+    float scale = std::sqrt(result->cols);    
 
     for (int i = 0; i < result->size; ++i) {
-        result->data[i] /= scale;
+        result->data[i] = result->data[i]/scale;
     }
-
-    return *result;
+    
+    return result;
 }
