@@ -25,6 +25,20 @@ float* dot_product_attention(float *query, int query_rows, int query_cols,
     return output;
 }
 
+Tensor dot_product_attention(Tensor &query, Tensor &key, Tensor &value, bool scaled){
+    key.transpose();
+    Tensor attention_weights = query * key;
+    std::cout << attention_weights << std::endl;
+    if (scaled){
+        scale(attention_weights, true);
+    }
+    softmax(attention_weights, true);
+    
+    Tensor output = attention_weights * value;
+
+    return output;
+}
+
 float* multi_head_attention(float *query, int query_rows, int query_cols,
                             float *key, int key_rows, int key_cols,
                             float *value, int value_rows, int value_cols, 
