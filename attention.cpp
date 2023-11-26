@@ -1,3 +1,5 @@
+#include <cstring>
+
 #include "computations.h"
 #include "activations.h"
 #include "helpers.h"
@@ -25,19 +27,35 @@ float* dot_product_attention(float *query, int query_rows, int query_cols,
     return output;
 }
 
-Tensor dot_product_attention(Tensor &query, Tensor &key, Tensor &value, bool scaled){
+Tensor* dot_product_attention(Tensor &query, Tensor &key, Tensor &value, bool scaled){
     key.transpose();
     Tensor attention_weights = query * key;
-    std::cout << attention_weights << std::endl;
+    
     if (scaled){
         scale(attention_weights, true);
     }
     softmax(attention_weights, true);
     
-    Tensor output = attention_weights * value;
+    Tensor _out = attention_weights * value;
+    Tensor *out = new Tensor(attention_weights.rows, value.cols);
+    std::memcpy(out->data, _out.data, sizeof(float) * _out.size);
 
-    return output;
+    return out;
 }
+
+// Tensor *multi_head_attention(Tensor &query, Tensor &key, Tensor &value, Tensor ***weights,
+//                              int num_heads, int embedding_size, bool use_embedding){
+//     int split_col_size = query.cols/num_heads;
+
+//     Tensor **query_split = query.vertical_split(num_heads);
+//     Tensor **key_split = key.vertical_split(num_heads);
+//     Tensor **value_split = value.vertical_split(num_heads);
+
+//     float *
+//     for(int head=0; head<num_heads; head++){
+
+//     }
+// }
 
 float* multi_head_attention(float *query, int query_rows, int query_cols,
                             float *key, int key_rows, int key_cols,
