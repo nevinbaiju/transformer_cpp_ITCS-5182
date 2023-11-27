@@ -1,7 +1,10 @@
 #include <random>
 #include <cmath>
-#include "initializations.h"
 #include <iostream>
+#include <vector>
+
+#include "initializations.h"
+#include "Tensor.h"
 
 void kaimingInit(float** array, int rows, int cols, int fan_in) {
     std::random_device rd;
@@ -75,6 +78,25 @@ float** vertical_split(float *matrix, int rows, int cols, int num_splits) {
             for (int col = 0; col < splitSize; ++col) {
                 result[i][row * splitSize + col] = matrix[row * cols + col_offset + col];
             }
+        }
+    }
+
+    return result;
+}
+
+Tensor *vertical_concat(std::vector<Tensor*> tensors){
+    int tens_len = tensors.size();
+    int tens_cols = tensors[0]->cols;
+    int tens_rows = tensors[0]->rows;
+
+    Tensor *result = new Tensor(tens_rows, tens_cols*tens_len);
+    int tens_index, tens_col_index;
+    for (int i=0; i<tens_rows; i++){
+        for (int j=0; j<result->cols; j++){
+            tens_index = j/tens_cols;
+            tens_col_index = j%tens_cols;
+
+            result->data[i*result->cols + j] = tensors[tens_index]->data[i*tens_cols + tens_col_index];
         }
     }
 

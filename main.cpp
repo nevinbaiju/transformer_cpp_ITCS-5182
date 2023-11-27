@@ -10,26 +10,48 @@
 #include "Tensor.h"
 
 // int main(int argc, char *argv[]) {
-//     Tensor query(1, 1);
-//     Tensor key(1, 10);
-//     Tensor value(1, 10);
     
-//     query.setOneInit(1);
-//     key.setOneInit(1);
+//     std::vector<Tensor*> dot_prod_res;
     
-//     std::cout << query * key;
+//     for(int i=0; i<10; i++)
+//         dot_prod_res.push_back(new Tensor(10, 1));
+
+//     Tensor *result = vertical_concat(dot_prod_res);
+
+//     std::cout << *result;
 // }
 
 
 int main(int argc, char *argv[]) {
-    Tensor query(10, 1000);
-    Tensor key(10, 1000);
-    Tensor value(10, 1000);
+    
+    int rows = 100000, cols=100000;
+    
+    Tensor query(rows, cols);
+    Tensor key(rows, cols);
+    Tensor value(rows, cols);
     
     query.setOneInit(1);
     key.setOneInit(1);
     value.setOneInit(1);
 
-    Tensor *output = dot_product_attention(query, key, value, true);
-    std::cout << *output;
+    int num_heads = 4;
+    int embedding_dims = cols;
+    int col_split = cols/num_heads;
+    
+    Tensor **query_weights = new Tensor*[num_heads];
+    Tensor **key_weights = new Tensor*[num_heads];
+    Tensor **value_weights = new Tensor*[num_heads];
+
+    for(int i=0; i<num_heads; i++){
+        query_weights[i] = new Tensor(col_split, col_split);
+        query_weights[i]->setOneInit(1);
+        key_weights[i] = new Tensor(col_split, col_split);
+        key_weights[i]->setOneInit(1);
+        value_weights[i] = new Tensor(col_split, col_split);
+        value_weights[i]->setOneInit(1);
+    }
+    Tensor *output = multi_head_attention(query, key, value, query_weights, key_weights, value_weights, num_heads, embedding_dims, true);
+    std::cout << output->rows << "  " << output->cols << " \n";
+    // std::cout << *output;
+
 }

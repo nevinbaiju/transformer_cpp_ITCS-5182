@@ -66,6 +66,9 @@ Tensor Tensor::operator*(const Tensor& other) const {
     }
     Tensor result(rows, other.cols);
 
+    // std::cout << "Mult" << std::endl;
+    // std::cout << *this << " \n" << other << std::endl;
+
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < other.cols; j++) {
             result.data[i * other.cols + j] = 0;
@@ -74,6 +77,8 @@ Tensor Tensor::operator*(const Tensor& other) const {
             }
         }
     }
+    
+    // std::cout << "Result: " << result << "\n end mult" << std::endl;
 
     return result;
 }
@@ -84,7 +89,7 @@ Tensor::Tensor(const Tensor& other) : rows(other.rows), cols(other.cols), size(o
 void Tensor::transpose() {
     float temp;
     float *result = new float[rows*cols];
-    
+    // std::cout << "Transposing \n" << *this << std::endl;
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
             result[j*rows + i] = data[i*cols + j];
