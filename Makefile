@@ -1,5 +1,6 @@
 CXX = g++
-CXXFLAGS = -std=c++11 -fopenmp
+CXXFLAGS = -std=c++11
+AVX_FLAGS = -fopenmp -mavx
 
 SRCS = main.cpp activations.cpp initializations.cpp helpers.cpp computations.cpp exceptions.cpp attention.cpp Tensor.cpp
 
@@ -17,14 +18,14 @@ $(EXEC_NORMAL): $(NORMAL_OBJS)
 	$(CXX) $(CXXFLAGS) -DNORMAL $(NORMAL_OBJS) -o $(EXEC_NORMAL)
 
 $(EXEC_AVX): $(AVX_OBJS)
-	$(CXX) $(CXXFLAGS) -DAVX $(AVX_OBJS) -o $(EXEC_AVX)
+	$(CXX) $(CXXFLAGS) $(AVX_FLAGS) -DAVX $(AVX_OBJS) -o $(EXEC_AVX)
 
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -DNORMAL -c $< -o $@
 
 %_avx.o: %.cpp
-	$(CXX) $(CXXFLAGS) -DAVX -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(AVX_FLAGS) -DAVX -c $< -o $@
 
 clean:
 	rm -f $(NORMAL_OBJS) $(AVX_OBJS) $(EXEC_NORMAL) $(EXEC_AVX)

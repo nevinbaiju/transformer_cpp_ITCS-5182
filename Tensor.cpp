@@ -10,7 +10,7 @@
 
 Tensor::Tensor(int rows, int cols) : rows(rows), cols(cols), size(rows * cols) {
     data = new float[size];
-}
+}       
 
 Tensor::~Tensor() {
     if (data != nullptr){
@@ -70,14 +70,29 @@ Tensor Tensor::operator*(const Tensor& other) const {
     // std::cout << "Mult" << std::endl;
     // std::cout << *this << " \n" << other << std::endl;
 
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < other.cols; j++) {
-            result.data[i * other.cols + j] = 0;
-            for (int k = 0; k < cols; k++) {
-                result.data[i * other.cols + j] += data[i * cols + k] * other.data[k * other.cols + j];
+    #ifdef NORMAL
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < other.cols; j++) {
+                result.data[i * other.cols + j] = 0;
+                for (int k = 0; k < cols; k++) {
+                    result.data[i * other.cols + j] += data[i * cols + k] * other.data[k * other.cols + j];
+                }
             }
         }
-    }
+    #else
+        #ifdef AVX
+            int i, j, k;
+            #pragma omp parallel for private(i,j,k)
+            for (i = 0; i < rows; i++) {
+                for (j = 0; j < other.cols; j++) {
+                    result.data[i * other.cols + j] = 0;
+                    for (k = 0; k < cols; k++) {
+                        result.data[i * other.cols + j] += data[i * cols + k] * other.data[k * other.cols + j];
+                    }
+                }
+            }
+        #endif
+    #endif
     
     // std::cout << "Result: " << result << "\n end mult" << std::endl;
 

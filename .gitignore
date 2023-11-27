@@ -1,5 +1,5 @@
 *.o
-run_transformer
+run_transformer*
 .ipynb_checkpoints
 test.ipynb
 .vscode
