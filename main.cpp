@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
     std::chrono::duration<double> seconds = end_time - start_time;
 
     std::cout << output->rows << "  " << output->cols << " \n";
-    std::cerr << "Time Taken: " << seconds.count() << " \n";
+    std::cout << "Time Taken: " << seconds.count() << " \n";
     std::cerr << seconds.count() << " \n";
     // std::cout << *output;
 
