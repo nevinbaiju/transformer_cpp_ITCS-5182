@@ -2,24 +2,29 @@ CXX = g++
 CXXFLAGS = -std=c++11 -fopenmp
 
 SRCS = main.cpp activations.cpp initializations.cpp helpers.cpp computations.cpp exceptions.cpp attention.cpp Tensor.cpp
-OBJS = $(SRCS:.cpp=.o)
-EXEC = run_transformer
+
+NORMAL_OBJS = $(SRCS:.cpp=.o)
+EXEC_NORMAL = run_transformer
+
+AVX_OBJS = $(SRCS:.cpp=_avx.o)
+EXEC_AVX = run_transformer_avx
 
 .PHONY: all clean
 
-all: $(EXEC)
+all: $(EXEC_NORMAL)
 
-$(EXEC): $(OBJS)
-	$(CXX) $(CXXFLAGS) $(OBJS) -o $(EXEC)
+$(EXEC_NORMAL): $(NORMAL_OBJS)
+	$(CXX) $(CXXFLAGS) -DNORMAL $(NORMAL_OBJS) -o $(EXEC_NORMAL)
 
-activations.o: activations.cpp activations.h
-	$(CXX) $(CXXFLAGS) -c activations.cpp
+$(EXEC_AVX): $(AVX_OBJS)
+	$(CXX) $(CXXFLAGS) -DAVX $(AVX_OBJS) -o $(EXEC_AVX)
 
-main.o: main.cpp activations.h
-	$(CXX) $(CXXFLAGS) -c main.cpp
 
-run:
-	./run_transformer 10 1 5
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -DNORMAL -c $< -o $@
+
+%_avx.o: %.cpp
+	$(CXX) $(CXXFLAGS) -DAVX -c $< -o $@
 
 clean:
-	rm -f $(OBJS) $(EXEC)
+	rm -f $(NORMAL_OBJS) $(AVX_OBJS) $(EXEC_NORMAL) $(EXEC_AVX)
