@@ -24,7 +24,9 @@
 
 int main(int argc, char *argv[]) {
     
-    int rows = 100000, cols=100000;
+    int rows = 100;
+    int64_t cols = atoi(argv[1]);
+    int num_heads =  atoi(argv[2]);
     
     Tensor query(rows, cols);
     Tensor key(rows, cols);
@@ -33,8 +35,7 @@ int main(int argc, char *argv[]) {
     query.setOneInit(1);
     key.setOneInit(1);
     value.setOneInit(1);
-
-    int num_heads = 4;
+    
     int embedding_dims = cols;
     int col_split = cols/num_heads;
     
@@ -50,8 +51,16 @@ int main(int argc, char *argv[]) {
         value_weights[i] = new Tensor(col_split, col_split);
         value_weights[i]->setOneInit(1);
     }
+
+    auto start_time = std::chrono::high_resolution_clock::now();
     Tensor *output = multi_head_attention(query, key, value, query_weights, key_weights, value_weights, num_heads, embedding_dims, true);
+    auto end_time = std::chrono::high_resolution_clock::now();
+
+    std::chrono::duration<double> seconds = end_time - start_time;
+
     std::cout << output->rows << "  " << output->cols << " \n";
+    std::cerr << "Time Taken: " << seconds.count() << " \n";
+    std::cerr << seconds.count() << " \n";
     // std::cout << *output;
 
 }
