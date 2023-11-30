@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <cstring>
 #include <omp.h>
+#include <immintrin.h>
 
 #include "Tensor.h"
 #include "exceptions.h"
@@ -66,6 +67,7 @@ Tensor Tensor::operator*(const Tensor& other) const {
         throw SizeMismatchException(rows, cols, other.rows, other.cols);
     }
     Tensor result(rows, other.cols);
+    result.setOneInit(0);
 
     // std::cout << "Mult" << std::endl;
     // std::cout << *this << " \n" << other << std::endl;
@@ -82,12 +84,30 @@ Tensor Tensor::operator*(const Tensor& other) const {
     #else
         #ifdef AVX
             int i, j, k;
-            #pragma omp parallel for private(i,j,k)
-            for (i = 0; i < rows; i++) {
-                for (j = 0; j < other.cols; j++) {
-                    result.data[i * other.cols + j] = 0;
-                    for (k = 0; k < cols; k++) {
-                        result.data[i * other.cols + j] += data[i * cols + k] * other.data[k * other.cols + j];
+            __m256 a, b, result_register;
+            float temp_result[8];
+
+            #pragma omp parallel for private(a, b, result_register, temp_result, i, j, k)
+            for(i=0; i<rows; i+=8){
+                float temp_result[8];
+                for(j=0; j<cols; j++){
+                    for (k=0; k<other.cols; k++){
+                        a = _mm256_set_ps(data[(i)*cols + j], data[(i+1)*cols + j], 
+                                          data[(i+2)*cols + j], data[(i+3)*cols + j], 
+                                          data[(i+4)*cols + j], data[(i+5)*cols + j], 
+                                          data[(i+6)*cols + j], data[(i+7)*cols + j]);
+                        b = _mm256_set1_ps(other.data[j*other.cols + k]);
+                        result_register = _mm256_set_ps(result.data[(i)*other.cols + k], result.data[(i+1)*other.cols + k], 
+                                                        result.data[(i+2)*other.cols + k], result.data[(i+3)*other.cols + k], 
+                                                        result.data[(i+4)*other.cols + k], result.data[(i+5)*other.cols + k], 
+                                                        result.data[(i+6)*other.cols + k], result.data[(i+7)*other.cols + k]);
+                        result_register = _mm256_fmadd_ps(a, b, result_register);
+                        _mm256_storeu_ps(&temp_result[0], result_register);
+
+                        #pragma unroll
+                        for(int res_id=0; res_id<8; res_id++){
+                            result.data[(i+res_id)*other.cols + k] = temp_result[res_id];
+                        }
                     }
                 }
             }
