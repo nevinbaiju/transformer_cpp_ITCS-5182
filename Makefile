@@ -1,6 +1,6 @@
 CXX = g++
-CXXFLAGS = -std=c++11
-AVX_FLAGS = -fopenmp -mavx
+CXXFLAGS = -std=c++11 -O3
+AVX_FLAGS = -fopenmp -mavx -march=native -mtune=native
 
 SRCS = main.cpp activations.cpp initializations.cpp helpers.cpp computations.cpp exceptions.cpp attention.cpp Tensor.cpp
 

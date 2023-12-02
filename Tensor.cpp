@@ -83,25 +83,31 @@ Tensor Tensor::operator*(const Tensor& other) const {
         }
     #else
         #ifdef AVX
-            int i, j, k;
-            __m256 a, b, result_register;
+            int i, j, k, pipeline_id;
+            const int num_pipeline = 4;
+            __m256 a[num_pipeline], b[num_pipeline], result_register;
             float temp_result[8];
 
-            #pragma omp parallel for private(a, b, result_register, temp_result, i, j, k)
+            #pragma omp parallel for private(a, b, result_register, temp_result, i, j, k, pipeline_id)
             for(i=0; i<rows; i+=8){
                 float temp_result[8];
-                for(j=0; j<cols; j++){
+                j = 0;
+                for(j=0; j<cols; j+=num_pipeline){
                     for (k=0; k<other.cols; k++){
-                        a = _mm256_set_ps(data[(i)*cols + j], data[(i+1)*cols + j], 
-                                          data[(i+2)*cols + j], data[(i+3)*cols + j], 
-                                          data[(i+4)*cols + j], data[(i+5)*cols + j], 
-                                          data[(i+6)*cols + j], data[(i+7)*cols + j]);
-                        b = _mm256_set1_ps(other.data[j*other.cols + k]);
                         result_register = _mm256_set_ps(result.data[(i)*other.cols + k], result.data[(i+1)*other.cols + k], 
                                                         result.data[(i+2)*other.cols + k], result.data[(i+3)*other.cols + k], 
                                                         result.data[(i+4)*other.cols + k], result.data[(i+5)*other.cols + k], 
                                                         result.data[(i+6)*other.cols + k], result.data[(i+7)*other.cols + k]);
-                        result_register = _mm256_fmadd_ps(a, b, result_register);
+                        #pragma unroll
+                        for(pipeline_id = 0; pipeline_id < num_pipeline; pipeline_id++){
+                            a[pipeline_id] = _mm256_set_ps(data[(i)*cols + j+pipeline_id], data[(i+1)*cols + j+pipeline_id], 
+                                                           data[(i+2)*cols + j+pipeline_id], data[(i+3)*cols + j+pipeline_id], 
+                                                           data[(i+4)*cols + j+pipeline_id], data[(i+5)*cols + j+pipeline_id], 
+                                                           data[(i+6)*cols + j+pipeline_id], data[(i+7)*cols + j+pipeline_id]);
+                            b[pipeline_id] = _mm256_set1_ps(other.data[(j+pipeline_id)*other.cols + k]);
+                            result_register = _mm256_fmadd_ps(a[pipeline_id], b[pipeline_id], result_register);
+                        }                                                        
+                        
                         _mm256_storeu_ps(&temp_result[0], result_register);
 
                         #pragma unroll
