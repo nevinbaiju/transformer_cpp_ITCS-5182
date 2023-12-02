@@ -59,13 +59,19 @@ Tensor relu(Tensor &mat, bool inplace) {
 
 void _softmax(float *input, int start_index, int end_index){
     float max_val=input[start_index], sum_val=0;
+
+    #pragma omp parallel for reduction(max:max_val)
     for(int i=start_index+1; i<end_index; i++){
         max_val = std::max(max_val, input[i]);
     }
+
+    #pragma omp parallel for reduction(+:sum_val)
     for(int i=start_index; i<end_index; i++){
         input[i] = exp(input[i] - max_val);
         sum_val += input[i];
     }
+
+    #pragma simd
     for(int i=start_index; i<end_index; i++){
         input[i] = input[i]/sum_val;
     }
@@ -108,6 +114,24 @@ Tensor* softmax(Tensor &mat, bool inplace){
     return result;
 }
 
+Tensor* softmax(Tensor *mat, bool inplace){
+    Tensor *result;
+
+    if (inplace){
+        result = mat;
+    }
+    else{
+        result = new Tensor(mat->rows, mat->cols);
+        std::memcpy(result->data, mat->data, sizeof(float) * mat->size);
+    }
+    int i, j;
+    for(i=0; i<result->rows; i++){
+        _softmax(result->data, i*result->cols, (i+1)*result->cols);
+    }
+
+    return result;
+}
+
 float* scale(float *input, int rows, int cols, bool inplace){
     float *result;
 
@@ -137,6 +161,26 @@ Tensor* scale(Tensor &mat, bool inplace) {
 
     float scale = std::sqrt(result->cols);    
 
+    for (int i = 0; i < result->size; ++i) {
+        result->data[i] = result->data[i]/scale;
+    }
+    
+    return result;
+}
+
+Tensor* scale(Tensor *mat, bool inplace) {
+    Tensor *result;
+
+    if (inplace) {
+        result = mat;
+    } else {
+        result = new Tensor(mat->rows, mat->cols);
+        std::memcpy(result->data, mat->data, sizeof(float) * mat->size);
+    }
+
+    float scale = std::sqrt(result->cols);    
+
+    #pragma simd
     for (int i = 0; i < result->size; ++i) {
         result->data[i] = result->data[i]/scale;
     }
