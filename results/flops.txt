@@ -93,3 +93,5 @@ Time taken: 3.69724
 Time taken: 2.05916 
 Time taken: 1.62669 
 Time taken: 1.33905 
+0.803751 
+0.0357298 
