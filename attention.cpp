@@ -28,18 +28,16 @@ float* dot_product_attention(float *query, int query_rows, int query_cols,
     return output;
 }
 
-Tensor* dot_product_attention(Tensor &query, Tensor &key, Tensor &value, bool scaled){
-    key.transpose();
-    Tensor attention_weights = query * key;
+Tensor* dot_product_attention(Tensor *query, Tensor *key, Tensor *value, bool scaled){
+    key->transpose();
+    Tensor *attention_weights = *query * *key;
     
     if (scaled){
         scale(attention_weights, true);
     }
     softmax(attention_weights, true);
-    
-    Tensor _out = attention_weights * value;
-    Tensor *out = new Tensor(attention_weights.rows, value.cols);
-    std::memcpy(out->data, _out.data, sizeof(float) * _out.size);
+
+    Tensor *out = *attention_weights * *value;
 
     return out;
 }
@@ -108,24 +106,16 @@ Tensor* multi_head_attention(Tensor &query, Tensor &key, Tensor &value,
 
     if(use_embedding){
         for(int head=0; head<num_heads; head++){
-            Tensor query_temp = *query_split[head] * *query_weights[head];
-            query_transformed[head] = new Tensor(query_temp.rows, query_temp.cols);
-            std::memcpy(query_transformed[head]->data, query_temp.data, sizeof(float) * query_temp.size);
-
-            Tensor key_temp = *key_split[head] * *key_weights[head];
-            key_transformed[head] = new Tensor(key_temp.rows, key_temp.cols);
-            std::memcpy(key_transformed[head]->data, key_temp.data, sizeof(float) * key_temp.size);
-
-            Tensor value_temp = *value_split[head] * *value_weights[head];
-            value_transformed[head] = new Tensor(value_temp.rows, value_temp.cols);
-            std::memcpy(value_transformed[head]->data, value_temp.data, sizeof(float) * value_temp.size);
+            query_transformed[head] = *query_split[head] * *query_weights[head];
+            key_transformed[head] = *key_split[head] * *key_weights[head];
+            value_transformed[head] = *value_split[head] * *value_weights[head];
         }
     }
 
     std::vector<Tensor*> dot_prod_res;
 
     for(int head=0; head<num_heads; head++){
-        dot_prod_res.push_back(dot_product_attention(*query_transformed[head], *key_transformed[head], *value_transformed[head], true));
+        dot_prod_res.push_back(dot_product_attention(query_transformed[head], key_transformed[head], value_transformed[head], true));
     }
 
     return vertical_concat(dot_prod_res);

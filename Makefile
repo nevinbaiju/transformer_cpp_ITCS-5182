@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++11 -O3
+CXXFLAGS = -O3 -std=c++11 
 AVX_FLAGS = -fopenmp -mavx -march=native -mtune=native
 
 SRCS = main.cpp activations.cpp initializations.cpp helpers.cpp computations.cpp exceptions.cpp attention.cpp Tensor.cpp
@@ -15,7 +15,7 @@ EXEC_AVX = run_transformer_avx
 all: $(EXEC_NORMAL)
 
 $(EXEC_NORMAL): $(NORMAL_OBJS)
-	$(CXX) $(CXXFLAGS) -DNORMAL $(NORMAL_OBJS) -o $(EXEC_NORMAL)
+	$(CXX) $(CXXFLAGS)  -DNORMAL $(NORMAL_OBJS) -o $(EXEC_NORMAL)
 
 $(EXEC_AVX): $(AVX_OBJS)
 	$(CXX) $(CXXFLAGS) $(AVX_FLAGS) -DAVX $(AVX_OBJS) -o $(EXEC_AVX)

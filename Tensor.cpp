@@ -62,22 +62,22 @@ std::ostream& operator<<(std::ostream& os, const Tensor& tensor) {
     return os;
 }
 
-Tensor Tensor::operator*(const Tensor& other) const {
+Tensor* Tensor::operator*(const Tensor& other) const {
+
+    // std::cout << "Mult" << std::endl;
+    // std::cout << *this << " \n With \n" << other << std::endl;
     if (cols != other.rows) {
         throw SizeMismatchException(rows, cols, other.rows, other.cols);
     }
-    Tensor result(rows, other.cols);
-    result.setOneInit(0);
-
-    // std::cout << "Mult" << std::endl;
-    // std::cout << *this << " \n" << other << std::endl;
+    Tensor *result = new Tensor(rows, other.cols);
+    result->setOneInit(0);
 
     #ifdef NORMAL
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < other.cols; j++) {
-                result.data[i * other.cols + j] = 0;
+                result->data[i * other.cols + j] = 0;
                 for (int k = 0; k < cols; k++) {
-                    result.data[i * other.cols + j] += data[i * cols + k] * other.data[k * other.cols + j];
+                    result->data[i * other.cols + j] += data[i * cols + k] * other.data[k * other.cols + j];
                 }
             }
         }
@@ -94,10 +94,10 @@ Tensor Tensor::operator*(const Tensor& other) const {
                 j = 0;
                 for(j=0; j<cols; j+=num_pipeline){
                     for (k=0; k<other.cols; k++){
-                        result_register = _mm256_set_ps(result.data[(i)*other.cols + k], result.data[(i+1)*other.cols + k], 
-                                                        result.data[(i+2)*other.cols + k], result.data[(i+3)*other.cols + k], 
-                                                        result.data[(i+4)*other.cols + k], result.data[(i+5)*other.cols + k], 
-                                                        result.data[(i+6)*other.cols + k], result.data[(i+7)*other.cols + k]);
+                        result_register = _mm256_set_ps(result->data[(i)*other.cols + k], result->data[(i+1)*other.cols + k], 
+                                                        result->data[(i+2)*other.cols + k], result->data[(i+3)*other.cols + k], 
+                                                        result->data[(i+4)*other.cols + k], result->data[(i+5)*other.cols + k], 
+                                                        result->data[(i+6)*other.cols + k], result->data[(i+7)*other.cols + k]);
                         #pragma unroll
                         for(pipeline_id = 0; pipeline_id < num_pipeline; pipeline_id++){
                             a[pipeline_id] = _mm256_set_ps(data[(i)*cols + j+pipeline_id], data[(i+1)*cols + j+pipeline_id], 
@@ -112,7 +112,7 @@ Tensor Tensor::operator*(const Tensor& other) const {
 
                         #pragma unroll
                         for(int res_id=0; res_id<8; res_id++){
-                            result.data[(i+res_id)*other.cols + k] = temp_result[res_id];
+                            result->data[(i+res_id)*other.cols + k] = temp_result[res_id];
                         }
                     }
                 }
@@ -124,6 +124,8 @@ Tensor Tensor::operator*(const Tensor& other) const {
 
     return result;
 }
+
+
 Tensor::Tensor(const Tensor& other) : rows(other.rows), cols(other.cols), size(other.size) {
         std::memcpy(data, other.data, sizeof(float) * size);
 }

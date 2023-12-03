@@ -18,9 +18,9 @@ float* relu(float input[], int size, bool inplace) {
     }
 
     if (inplace) {
-        return input;  // Return the input array reference
+        return input;
     } else {
-        return result; // Return the new result array reference
+        return result;
     }
 }
 
