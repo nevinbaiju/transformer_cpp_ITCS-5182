@@ -3,8 +3,10 @@
 #include <random>
 #include <iomanip>
 #include <cstring>
-#include <omp.h>
-#include <immintrin.h>
+#ifdef AVX
+    #include <omp.h>
+    #include <immintrin.h>
+#endif
 
 #include "Tensor.h"
 #include "exceptions.h"
