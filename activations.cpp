@@ -125,6 +125,7 @@ Tensor* softmax(Tensor *mat, bool inplace){
         std::memcpy(result->data, mat->data, sizeof(float) * mat->size);
     }
     int i, j;
+    #pragma omp for
     for(i=0; i<result->rows; i++){
         _softmax(result->data, i*result->cols, (i+1)*result->cols);
     }

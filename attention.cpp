@@ -1,5 +1,6 @@
 #include <cstring>
 #include <vector>
+#include <omp.h>
 
 #include "computations.h"
 #include "activations.h"
@@ -105,10 +106,21 @@ Tensor* multi_head_attention(Tensor &query, Tensor &key, Tensor &value,
     Tensor **value_transformed = new Tensor*[num_heads];
 
     if(use_embedding){
-        for(int head=0; head<num_heads; head++){
-            query_transformed[head] = *query_split[head] * *query_weights[head];
-            key_transformed[head] = *key_split[head] * *key_weights[head];
-            value_transformed[head] = *value_split[head] * *value_weights[head];
+        if(num_heads >= 10 | (query.cols >= 5000))
+        {
+            #pragma omp parallel for
+            for(int head=0; head<num_heads; head++){
+                query_transformed[head] = *query_split[head] * *query_weights[head];
+                key_transformed[head] = *key_split[head] * *key_weights[head];
+                value_transformed[head] = *value_split[head] * *value_weights[head];
+            }
+        }
+        else{
+            for(int head=0; head<num_heads; head++){
+                query_transformed[head] = *query_split[head] * *query_weights[head];
+                key_transformed[head] = *key_split[head] * *key_weights[head];
+                value_transformed[head] = *value_split[head] * *value_weights[head];
+            }
         }
     }
 
