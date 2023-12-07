@@ -22,7 +22,7 @@ public:
     int rows;
     int cols;
     int size;
-    int block_size=256;
+    int block_size;
     float* data;
 
     // void kaimingInit(int fan_in);
@@ -31,7 +31,7 @@ public:
     void setOneInit(float val);
     Tensor* to_cpu();
     void transpose();
-    // D_Tensor* operator*(const D_Tensor& other) const;
+    D_Tensor* operator*(const D_Tensor& other) const;
     // D_Tensor** vertical_split(int num_splits);
     // D_Tensor(const D_Tensor& other); 
 

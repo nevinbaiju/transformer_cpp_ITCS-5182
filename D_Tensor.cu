@@ -8,10 +8,13 @@
 
 D_Tensor::D_Tensor(int rows, int cols) : rows(rows), cols(cols), size(rows * cols), block_size(block_size) {
     gpuErrchk(cudaMalloc(&data, size*sizeof(float)));
+    cudaDeviceSynchronize();
+    block_size = 256;
 }       
 
 D_Tensor::~D_Tensor() {
     gpuErrchk(cudaFree(data));
+    cudaDeviceSynchronize();
 }
 
 void D_Tensor::sequentialInit() {
@@ -22,7 +25,7 @@ void D_Tensor::sequentialInit() {
 }
 
 void D_Tensor::setOneInit(float val) {
-    int grid_size = (size + block_size - 1) / block_size;
+    int grid_size = (size + 256 - 1) / 256;
     d_setOneInit<<<grid_size, block_size>>>(data, size, val);
     cudaDeviceSynchronize();
     gpuErrchk(cudaPeekAtLastError());
@@ -50,68 +53,23 @@ std::ostream& operator<<(std::ostream& os, const D_Tensor& D_Tensor) {
     return os;
 }
 
-// D_Tensor* D_Tensor::operator*(const D_Tensor& other) const {
+D_Tensor* D_Tensor::operator*(const D_Tensor& other) const {
+    std::cout << block_size << std::endl;
+    // dim3 gridDim(ceil((rows+block_size)/block_size), ceil((block_size+rows)/block_size), 1);
+    dim3 gridDim(1, 1, 1);
+    dim3 blockDim(2, 5, 1);
 
-//     // std::cout << "Mult" << std::endl;
-//     // std::cout << *this << " \n With \n" << other << std::endl;
-//     if (cols != other.rows) {
-//         throw SizeMismatchException(rows, cols, other.rows, other.cols);
-//     }
-//     D_Tensor *result = new D_Tensor(rows, other.cols);
-//     result->setOneInit(0);
+    std::cout << gridDim.x  << ", " << gridDim.y << ", " << gridDim.z << std::endl;
+    std::cout << blockDim.x  << ", " << blockDim.y << ", " << blockDim.z << std::endl<< std::endl;
 
-//     #ifdef NORMAL
-//         for (int i = 0; i < rows; i++) {
-//             for (int j = 0; j < other.cols; j++) {
-//                 result->data[i * other.cols + j] = 0;
-//                 for (int k = 0; k < cols; k++) {
-//                     result->data[i * other.cols + j] += data[i * cols + k] * other.data[k * other.cols + j];
-//                 }
-//             }
-//         }
-//     #else
-//         #ifdef AVX
-//             int i, j, k, pipeline_id;
-//             const int num_pipeline = 4;
-//             __m256 a[num_pipeline], b[num_pipeline], result_register;
-//             float temp_result[8];
+    D_Tensor *result = new D_Tensor(rows, other.cols);
 
-//             #pragma omp parallel for private(a, b, result_register, temp_result, i, j, k, pipeline_id)
-//             for(i=0; i<rows; i+=8){
-//                 float temp_result[8];
-//                 j = 0;
-//                 for(j=0; j<cols; j+=num_pipeline){
-//                     for (k=0; k<other.cols; k++){
-//                         result_register = _mm256_set_ps(result->data[(i)*other.cols + k], result->data[(i+1)*other.cols + k], 
-//                                                         result->data[(i+2)*other.cols + k], result->data[(i+3)*other.cols + k], 
-//                                                         result->data[(i+4)*other.cols + k], result->data[(i+5)*other.cols + k], 
-//                                                         result->data[(i+6)*other.cols + k], result->data[(i+7)*other.cols + k]);
-//                         #pragma unroll
-//                         for(pipeline_id = 0; pipeline_id < num_pipeline; pipeline_id++){
-//                             a[pipeline_id] = _mm256_set_ps(data[(i)*cols + j+pipeline_id], data[(i+1)*cols + j+pipeline_id], 
-//                                                            data[(i+2)*cols + j+pipeline_id], data[(i+3)*cols + j+pipeline_id], 
-//                                                            data[(i+4)*cols + j+pipeline_id], data[(i+5)*cols + j+pipeline_id], 
-//                                                            data[(i+6)*cols + j+pipeline_id], data[(i+7)*cols + j+pipeline_id]);
-//                             b[pipeline_id] = _mm256_set1_ps(other.data[(j+pipeline_id)*other.cols + k]);
-//                             result_register = _mm256_fmadd_ps(a[pipeline_id], b[pipeline_id], result_register);
-//                         }                                                        
-                        
-//                         _mm256_storeu_ps(&temp_result[0], result_register);
+    sgemm_naive<<<gridDim, blockDim>>>(rows, cols, other.cols, data, other.data, result->data);
+    cudaDeviceSynchronize();
+    gpuErrchk(cudaPeekAtLastError());
 
-//                         #pragma unroll
-//                         for(int res_id=0; res_id<8; res_id++){
-//                             result->data[(i+res_id)*other.cols + k] = temp_result[res_id];
-//                         }
-//                     }
-//                 }
-//             }
-//         #endif
-//     #endif
-    
-//     // std::cout << "Result: " << result << "\n end mult" << std::endl;
-
-//     return result;
-// }
+    return result;
+}
 
 
 // D_Tensor::D_Tensor(const D_Tensor& other) : rows(other.rows), cols(other.cols), size(other.size) {

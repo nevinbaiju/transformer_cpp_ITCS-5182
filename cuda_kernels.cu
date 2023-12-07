@@ -22,3 +22,17 @@ __global__ void d_transpose(float *original, float *transposed, int size, int ro
         transposed[y * rows + x] = original[idx];
     }
 }
+
+__global__ void sgemm_naive(int M, int N, int K,
+                            const float *A, const float *B, float *C) {
+  const uint x = blockIdx.x * blockDim.x + threadIdx.x;
+  const uint y = blockIdx.y * blockDim.y + threadIdx.y;
+  
+  if (x < M && y < K) {
+    float tmp = 0.0;
+    for (int i = 0; i < N; ++i) {
+      tmp += A[y * N + i] * B[i * K + x];
+    }
+    C[y * N + x] = tmp;
+  }
+}
