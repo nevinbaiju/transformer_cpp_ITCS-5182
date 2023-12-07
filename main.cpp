@@ -13,6 +13,7 @@
     #include "D_Tensor.cuh"
 #endif
 
+#ifdef AVX
 void test_matmul(int argc, char *argv[]) {
     int n = atoi(argv[1]);
     int m = atoi(argv[2]);
@@ -35,13 +36,13 @@ void test_matmul(int argc, char *argv[]) {
     std::chrono::duration<double> seconds = end_time - start_time;
     std::cerr << seconds.count() << " \n";
 
-    std::uint64_t flops = (((2*n*k)/(1024e2))*m)/1024;
-    std::uint64_t memory = ((m*n + m*k)*4)/(1024e3);
+    std::uint64_t flops = (((2*n*k)/(1e6))*m)/1e3;
+    std::uint64_t memory = ((m*n + m*k)*4);
 
     const float peak_memory_bw = 76.8;
     const float peak_flops = 1881;
 
-    std::cout << "Time Taken: " << seconds.count() << " Flops bound: " << flops/(peak_flops*1024) << ", Memory bound: " << memory/peak_memory_bw << std::endl; 
+    std::cout << "Time Taken: " << seconds.count() << " Flops bound: " << flops/(peak_flops*1024) << ", Memory bound: " << memory/(peak_memory_bw*1e9) << std::endl; 
     std::cout << "Flops: " << flops/seconds.count() << std::endl;
 }
 
@@ -87,15 +88,15 @@ void test_multi_head_attention(int argc, char *argv[]) {
 
     std::chrono::duration<double> seconds = end_time - start_time;
 
-    std::uint64_t flops = (3*2*rows*rows*cols + 4*rows*rows*cols + 3*rows*rows)/(1024e2);
-    std::uint64_t memory = (6*rows*cols*4)/(1024e3);
+    std::uint64_t flops = (3*2*rows*rows*cols + 4*rows*rows*cols + 3*rows*rows)/(1e9);
+    std::uint64_t memory = (15*rows*cols*4);
 
     std::cout << output->rows << "  " << output->cols << " \n";
 
     const float peak_memory_bw = 76.8;
     const float peak_flops = 1881;
 
-    std::cout << "Time Taken: " << seconds.count() << " Flops bound: " << flops/(peak_flops*1024) << ", Memory bound: " << memory/peak_memory_bw << std::endl; 
+    std::cout << "Time Taken: " << seconds.count() << " Flops bound: " << flops/(peak_flops*1024) << ", Memory bound: " << memory/(1e9*peak_memory_bw) << std::endl; 
     std::cout << "Flops: " << flops/(seconds.count()*1024)<< std::endl;
     std::cout << "Time Taken: " << seconds.count()/nb_iter << " \n";
     std::cerr << cols << "," << num_heads << "," << seconds.count()/nb_iter << " \n";
@@ -125,20 +126,64 @@ void test_dot_attention(int argc, char *argv[]){
 
     std::cout << *result << std::endl;;
 }
-
+#endif
 
 #ifdef CUDA
 void test_cuda(int argc, char *argv[]){
-    D_Tensor b(2, 3);
-    b.setOneInit(1);
 
-    D_Tensor a(2, 3);
-    // // b.setOneInit(1);
+    int n = atoi(argv[1]);
+    int m = atoi(argv[2]);
+    int k = atoi(argv[3]);
+
+    D_Tensor a(n, m);
+    a.setOneInit(1);
+    // std::cout << a << std::endl;
+    cudaDeviceSynchronize();
+    // Allocate memory for b
+    D_Tensor b(m, k);
+
+    // // Initialize b before using setOneInit
+    b.setOneInit(1);
+    // std::cout << b;
+
+    // // Now you can use setOneInit on b
+    // b.setOneInit(1);
     
-    std::cout << b ;
+    auto start_time = std::chrono::high_resolution_clock::now();
+    D_Tensor *r = a*b;
+    auto end_time = std::chrono::high_resolution_clock::now();
+
+    Tensor *r_cpu = r->to_cpu();
+
+    std::uint64_t flops = (((2*n*k)/(1e6))*m)/1e3;
+    std::uint64_t memory = ((m*n + m*k)*4);
+
+    const float peak_memory_bw = 76.8;
+    const float peak_flops = 1881;
+
+    std::chrono::duration<double> seconds = end_time - start_time;
+    for(int i=0; i<r_cpu->size; i++){
+        if (r_cpu->data[i] != m){
+            std::cerr << "Ans at " << i << ": " << r_cpu->data[i] << " is wrong\n";
+            // std::cout << *r;
+            break;
+        }
+    }
+    if (r->size < 50){
+        std::cout << *r_cpu << std::endl;
+    }
+
+    std::cout << "Time Taken: " << seconds.count() << " Flops bound: " << flops/(peak_flops*1024) << ", Memory bound: " << memory/(peak_memory_bw*1e9) << std::endl; 
+    std::cout << "Flops: " << flops/seconds.count() << std::endl;
 }
 #endif
 
 int main(int argc, char *argv[]) {
-    test_multi_head_attention(argc, argv);
+    #ifdef AVX
+    test_matmul(argc, argv);
+    #endif 
+
+    #ifdef CUDA
+    test_cuda(argc, argv);
+    #endif
 }

@@ -8,4 +8,7 @@ __global__ void d_transpose(float *original, float *transposed, int size, int ro
 __global__ void sgemm_naive(int M, int N, int K,
                             const float *A, 
                             const float *B, float *C);
+__global__ void mm_coalescing(int M, int K, int N, int block_size,
+                             const float *A, 
+                             const float *B, float *C);
 
