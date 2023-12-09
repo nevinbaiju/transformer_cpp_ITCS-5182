@@ -7,6 +7,11 @@
 #include "helpers.h"
 #include "initializations.h"
 
+#ifdef CUDA
+#include "D_Tensor.cuh"
+#include "d_activations.cuh"
+#endif
+
 float* dot_product_attention(float *query, int query_rows, int query_cols,
                              float *key, int key_rows, int key_cols,
                              float *value, int value_rows, int value_cols, 
@@ -42,6 +47,22 @@ Tensor* dot_product_attention(Tensor *query, Tensor *key, Tensor *value, bool sc
 
     return out;
 }
+
+#ifdef CUDA
+D_Tensor* dot_product_attention(D_Tensor *query, D_Tensor *key, D_Tensor *value, bool scaled){
+    key->transpose();
+    D_Tensor *attention_weights = *query * *key;
+    
+    if (scaled){
+        scale(attention_weights, true);
+    }
+    softmax(attention_weights, true);
+
+    D_Tensor *out = *attention_weights * *value;
+
+    return out;
+}
+#endif
 
 float* multi_head_attention(float *query, int query_rows, int query_cols,
                             float *key, int key_rows, int key_cols,

@@ -12,6 +12,7 @@
 #ifdef CUDA
     #include "D_Tensor.cuh"
 #endif
+#include "D_Tensor.cuh"
 
 #ifdef AVX
 void test_matmul(int argc, char *argv[]) {
@@ -129,7 +130,7 @@ void test_dot_attention(int argc, char *argv[]){
 #endif
 
 #ifdef CUDA
-void test_cuda(int argc, char *argv[]){
+void test_cuda_matmul(int argc, char *argv[]){
 
     int n = atoi(argv[1]);
     int m = atoi(argv[2]);
@@ -176,6 +177,21 @@ void test_cuda(int argc, char *argv[]){
     std::cout << "Time Taken: " << seconds.count() << " Flops bound: " << flops/(peak_flops*1024) << ", Memory bound: " << memory/(peak_memory_bw*1e9) << std::endl; 
     std::cout << "Flops: " << flops/seconds.count() << std::endl;
 }
+
+void test_cuda_dotproduct_attention(int argc, char *argv[]){
+    int rows = atoi(argv[1]);
+    int cols = atoi(argv[2]);
+    D_Tensor *a = new D_Tensor(rows, cols);
+    D_Tensor *b = new D_Tensor(rows, cols);
+    D_Tensor *c = new D_Tensor(rows, cols);
+    a->setOneInit(1);
+    b->setOneInit(1);
+    c->setOneInit(1);
+
+    D_Tensor *result = dot_product_attention(a, b, c, true);
+
+    std::cout << *result << std::endl;;
+}
 #endif
 
 int main(int argc, char *argv[]) {
@@ -184,6 +200,6 @@ int main(int argc, char *argv[]) {
     #endif 
 
     #ifdef CUDA
-    test_cuda(argc, argv);
+    test_cuda_dotproduct_attention(argc, argv);
     #endif
 }

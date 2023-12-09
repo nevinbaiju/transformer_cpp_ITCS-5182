@@ -4,7 +4,7 @@ CXXFLAGS = -O3 -std=c++11
 AVX_FLAGS = -fopenmp -mavx -march=native -mtune=native
 
 SRCS = main.cpp activations.cpp initializations.cpp helpers.cpp computations.cpp exceptions.cpp attention.cpp Tensor.cpp
-CUDA_SRCS = cuda_kernels.cu D_Tensor.cu
+CUDA_SRCS = cuda_kernels.cu D_Tensor.cu d_activations.cu
 
 NORMAL_OBJS = $(SRCS:.cpp=_normal.o)
 EXEC_NORMAL = run_transformer_normal
