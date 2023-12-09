@@ -192,14 +192,29 @@ void test_cuda_dotproduct_attention(int argc, char *argv[]){
 
     std::cout << *result << std::endl;;
 }
+
+void test_transpose(int argc, char * argv[]){
+    D_Tensor a(2, 6);
+    int num_splits = 6;
+    D_Tensor **result = new D_Tensor*[num_splits];
+    a.sequentialInit();
+    std::cout << a << std::endl;
+    result = a.vertical_split(num_splits);
+
+    std::cout << std::endl;
+    for(int i=0; i<num_splits; i++){
+        std::cout << *result[i] << std::endl;
+    }
+}
 #endif
 
 int main(int argc, char *argv[]) {
-    #ifdef AVX
-    test_matmul(argc, argv);
-    #endif 
+    // #ifdef AVX
+    // test_matmul(argc, argv);
+    // #endif 
 
-    #ifdef CUDA
-    test_cuda_dotproduct_attention(argc, argv);
-    #endif
+    // #ifdef CUDA
+    // test_cuda_dotproduct_attention(argc, argv);
+    // #endif
+    test_transpose(argc, argv);
 }

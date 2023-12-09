@@ -32,7 +32,7 @@ public:
     Tensor* to_cpu();
     void transpose();
     D_Tensor* operator*(const D_Tensor& other) const;
-    // D_Tensor** vertical_split(int num_splits);
+    D_Tensor** vertical_split(int num_splits);
     // D_Tensor(const D_Tensor& other); 
 
     friend std::ostream& operator<<(std::ostream& os, const D_Tensor& tensor);

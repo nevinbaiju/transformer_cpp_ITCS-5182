@@ -96,23 +96,23 @@ void D_Tensor::transpose() {
 }
 
 // // Need to change this to 1D
-// D_Tensor** D_Tensor::vertical_split(int num_splits) {
+D_Tensor** D_Tensor::vertical_split(int num_splits) {
 
-//     int splitSize = cols / num_splits;
+    int splitSize = cols / num_splits;
+    cudaStream_t stream[16];
     
-//     D_Tensor **result = new D_Tensor*[num_splits];
-//     for (int i = 0; i < num_splits; ++i) {
-//         result[i] = new D_Tensor(rows, splitSize);
-//     }
+    D_Tensor **result = new D_Tensor*[num_splits];
+    for(int i=0; i<num_splits; i++){
+        result[i] = new D_Tensor(rows, splitSize);
+    }
+    std::cout << *result[0];
+    for (int i=0; i<rows; i++){
+        for (int j = 0; j < num_splits; ++j) {
+            // printf("copying %d, %d from %d, %d");
+            gpuErrchk(cudaMemcpyAsync(result[j]->data + (i*splitSize), data + (i*cols + j*splitSize), splitSize * sizeof(float), cudaMemcpyDeviceToDevice));
+        }
+    }
+    cudaDeviceSynchronize();
     
-//     for (int i = 0; i < num_splits; ++i) {
-//         int col_offset = i * splitSize;
-//         for (int row = 0; row < rows; ++row) {
-//             for (int col = 0; col < splitSize; ++col) {
-//                 result[i]->data[row * splitSize + col] = data[row * cols + col_offset + col];
-//             }
-//         }
-//     }
-
-//     return result;
-// }
+    return result;
+}
