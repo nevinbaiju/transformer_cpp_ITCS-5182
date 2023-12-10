@@ -207,6 +207,64 @@ void test_transpose(int argc, char * argv[]){
 
     std::cout << *res;
 }
+
+void test_multi_head_attention(int argc, char *argv[]) {
+    
+    int rows = 1024;
+    int64_t cols = atoi(argv[1]);
+    int num_heads =  atoi(argv[2]);
+    const int nb_iter = 1;
+    
+    D_Tensor query(rows, cols);
+    D_Tensor key(rows, cols);
+    D_Tensor value(rows, cols);
+    
+    query.setOneInit(1);
+    key.setOneInit(1);
+    value.setOneInit(1);
+    
+    int embedding_dims = cols;
+    int col_split = cols/num_heads;
+    
+    D_Tensor **query_weights = new D_Tensor*[num_heads];
+    D_Tensor **key_weights = new D_Tensor*[num_heads];
+    D_Tensor **value_weights = new D_Tensor*[num_heads];
+
+    for(int i=0; i<num_heads; i++){
+        query_weights[i] = new D_Tensor(col_split, col_split);
+        query_weights[i]->setOneInit(1);
+        key_weights[i] = new D_Tensor(col_split, col_split);
+        key_weights[i]->setOneInit(1);
+        value_weights[i] = new D_Tensor(col_split, col_split);
+        value_weights[i]->setOneInit(1);
+    }
+
+    D_Tensor *output;
+    auto start_time = std::chrono::high_resolution_clock::now();
+    #pragma unroll
+    for(int i=0; i<nb_iter; i++){
+        output = multi_head_attention(query, key, value, query_weights, key_weights, value_weights, num_heads, embedding_dims, true);
+    }
+    auto end_time = std::chrono::high_resolution_clock::now();
+
+    std::chrono::duration<double> seconds = end_time - start_time;
+
+    std::uint64_t flops = (3*2*rows*rows*cols + 4*rows*rows*cols + 3*rows*rows)/(1e9);
+    std::uint64_t memory = (15*rows*cols*4);
+
+    std::cout << output->rows << "  " << output->cols << " \n";
+
+    const float peak_memory_bw = 76.8;
+    const float peak_flops = 1881;
+
+    std::cout << "Time Taken: " << seconds.count() << " Flops bound: " << flops/(peak_flops*1024) << ", Memory bound: " << memory/(1e9*peak_memory_bw) << std::endl; 
+    std::cout << "Flops: " << flops/(seconds.count()*1024)<< std::endl;
+    std::cout << "Time Taken: " << seconds.count()/nb_iter << " \n";
+    std::cerr << cols << "," << num_heads << "," << seconds.count()/nb_iter << " \n";
+    // std::cout << *output;
+
+}
+
 #endif
 
 int main(int argc, char *argv[]) {
@@ -217,5 +275,5 @@ int main(int argc, char *argv[]) {
     // #ifdef CUDA
     // test_cuda_dotproduct_attention(argc, argv);
     // #endif
-    test_transpose(argc, argv);
+    test_multi_head_attention(argc, argv);
 }

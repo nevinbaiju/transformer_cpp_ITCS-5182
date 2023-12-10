@@ -118,7 +118,6 @@ D_Tensor *vertical_concat(std::vector<D_Tensor*> tensors){
     int tens_col_index, result_cols = tens_cols*tens_len;
     for (int i=0; i<tens_rows; i++){
         for (int tens_id=0; tens_id<tens_len; tens_id++){
-            printf("row: %d, tens_id: %d\n", i, tens_id);
             tens_col_index = tens_cols * tens_id;
             // gpuErrchk(cudaMemcpy(result->data, tensors[0]->data, 3 * sizeof(float), cudaMemcpyDeviceToDevice));
             gpuErrchk(cudaMemcpy(result->data + (result_cols*i) + tens_id*tens_cols, 

@@ -54,7 +54,6 @@ std::ostream& operator<<(std::ostream& os, const D_Tensor& D_Tensor) {
 }
 
 D_Tensor* D_Tensor::operator*(const D_Tensor& other) const {
-    std::cout << block_size << std::endl;
     // dim3 gridDim(ceil((rows+block_size)/block_size), ceil((block_size+rows)/block_size), 1);
     dim3 gridDim(int((rows+block_size)/block_size), int((other.cols+block_size)/block_size), 1);
     dim3 blockDim(block_size * block_size);
@@ -104,7 +103,6 @@ D_Tensor** D_Tensor::vertical_split(int num_splits) {
     for(int i=0; i<num_splits; i++){
         result[i] = new D_Tensor(rows, splitSize);
     }
-    std::cout << *result[0];
     for (int i=0; i<rows; i++){
         for (int j = 0; j < num_splits; ++j) {
             // printf("copying %d, %d from %d, %d");

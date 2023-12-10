@@ -10,6 +10,7 @@
 #ifdef CUDA
 #include "D_Tensor.cuh"
 #include "d_activations.cuh"
+#include "cuda_kernels.cuh"
 #endif
 
 float* dot_product_attention(float *query, int query_rows, int query_cols,
@@ -127,7 +128,7 @@ Tensor* multi_head_attention(Tensor &query, Tensor &key, Tensor &value,
     Tensor **value_transformed = new Tensor*[num_heads];
 
     if(use_embedding){
-        if(num_heads >= 10 | (query.cols >= 5000))
+        if(num_heads >= 10 & (query.cols >= 5000))
         {
             #pragma omp parallel for
             for(int head=0; head<num_heads; head++){
@@ -153,3 +154,46 @@ Tensor* multi_head_attention(Tensor &query, Tensor &key, Tensor &value,
 
     return vertical_concat(dot_prod_res);
 }
+
+#ifdef CUDA
+D_Tensor* multi_head_attention(D_Tensor &query, D_Tensor &key, D_Tensor &value,
+                             D_Tensor **query_weights, D_Tensor **key_weights, D_Tensor **value_weights,
+                             int num_heads, int embedding_size, bool use_embedding){
+    int split_col_size = query.cols/num_heads;
+
+    D_Tensor **query_split = query.vertical_split(num_heads);
+    D_Tensor **key_split = key.vertical_split(num_heads);
+    D_Tensor **value_split = value.vertical_split(num_heads);
+    
+    D_Tensor **query_transformed = new D_Tensor*[num_heads];
+    D_Tensor **key_transformed = new D_Tensor*[num_heads];
+    D_Tensor **value_transformed = new D_Tensor*[num_heads];
+
+    if(use_embedding){
+        if(num_heads >= 10 | (query.cols >= 5000))
+        {
+            #pragma omp parallel for
+            for(int head=0; head<num_heads; head++){
+                query_transformed[head] = *query_split[head] * *query_weights[head];
+                key_transformed[head] = *key_split[head] * *key_weights[head];
+                value_transformed[head] = *value_split[head] * *value_weights[head];
+            }
+        }
+        else{
+            for(int head=0; head<num_heads; head++){
+                query_transformed[head] = *query_split[head] * *query_weights[head];
+                key_transformed[head] = *key_split[head] * *key_weights[head];
+                value_transformed[head] = *value_split[head] * *value_weights[head];
+            }
+        }
+    }
+
+    std::vector<D_Tensor*> dot_prod_res;
+
+    for(int head=0; head<num_heads; head++){
+        dot_prod_res.push_back(dot_product_attention(query_transformed[head], key_transformed[head], value_transformed[head], true));
+    }
+
+    return vertical_concat(dot_prod_res);
+}
+#endif
