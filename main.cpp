@@ -11,8 +11,8 @@
 
 #ifdef CUDA
     #include "D_Tensor.cuh"
+    #include "cuda_kernels.cuh"
 #endif
-#include "D_Tensor.cuh"
 
 #ifdef AVX
 void test_matmul(int argc, char *argv[]) {
@@ -194,17 +194,18 @@ void test_cuda_dotproduct_attention(int argc, char *argv[]){
 }
 
 void test_transpose(int argc, char * argv[]){
-    D_Tensor a(2, 6);
-    int num_splits = 6;
-    D_Tensor **result = new D_Tensor*[num_splits];
-    a.sequentialInit();
-    std::cout << a << std::endl;
-    result = a.vertical_split(num_splits);
+    D_Tensor *a = new D_Tensor(5, 9);
+    D_Tensor *b = new D_Tensor(5, 9);
+    a->sequentialInit();
+    b->sequentialInit();
 
-    std::cout << std::endl;
-    for(int i=0; i<num_splits; i++){
-        std::cout << *result[i] << std::endl;
-    }
+    std::vector<D_Tensor*> tenss;
+    tenss.push_back(a);
+    tenss.push_back(b);
+
+    D_Tensor *res = vertical_concat(tenss);
+
+    std::cout << *res;
 }
 #endif
 

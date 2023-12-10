@@ -2,9 +2,14 @@
 #include <cmath>
 #include <iostream>
 #include <vector>
+#include <stdio.h>
 
 #include "initializations.h"
 #include "Tensor.h"
+#ifdef CUDA
+#include "D_Tensor.cuh"
+#include <cuda_runtime.h>
+#endif
 
 void kaimingInit(float** array, int rows, int cols, int fan_in) {
     std::random_device rd;
@@ -102,3 +107,25 @@ Tensor *vertical_concat(std::vector<Tensor*> tensors){
 
     return result;
 }
+
+#ifdef CUDA
+D_Tensor *vertical_concat(std::vector<D_Tensor*> tensors){
+    int tens_len = tensors.size();
+    int tens_cols = tensors[0]->cols;
+    int tens_rows = tensors[0]->rows;
+
+    D_Tensor *result = new D_Tensor(tens_rows, tens_cols*tens_len);
+    int tens_col_index, result_cols = tens_cols*tens_len;
+    for (int i=0; i<tens_rows; i++){
+        for (int tens_id=0; tens_id<tens_len; tens_id++){
+            printf("row: %d, tens_id: %d\n", i, tens_id);
+            tens_col_index = tens_cols * tens_id;
+            // gpuErrchk(cudaMemcpy(result->data, tensors[0]->data, 3 * sizeof(float), cudaMemcpyDeviceToDevice));
+            gpuErrchk(cudaMemcpy(result->data + (result_cols*i) + tens_id*tens_cols, 
+                                 tensors[tens_id]->data + (i*tens_cols), 
+                                 tens_cols * sizeof(float), cudaMemcpyDeviceToDevice));
+        }
+    }
+    return result;
+}
+#endif

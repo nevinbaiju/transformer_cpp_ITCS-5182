@@ -99,7 +99,6 @@ void D_Tensor::transpose() {
 D_Tensor** D_Tensor::vertical_split(int num_splits) {
 
     int splitSize = cols / num_splits;
-    cudaStream_t stream[16];
     
     D_Tensor **result = new D_Tensor*[num_splits];
     for(int i=0; i<num_splits; i++){
