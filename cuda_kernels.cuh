@@ -14,4 +14,7 @@ __global__ void sgemm_naive(int M, int N, int K,
 __global__ void mm_coalescing(int M, int K, int N, int block_size,
                              const float *A, 
                              const float *B, float *C);
+template <int SharedSize>
+__global__ void mm_blocking(int M, int K, int N, int block_size,
+                   float *A, const float *B, float *C);
 

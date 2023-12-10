@@ -130,7 +130,11 @@ void test_dot_attention(int argc, char *argv[]){
 #endif
 
 #ifdef CUDA
-void test_cuda_matmul(int argc, char *argv[]){
+
+#define PEAK_FLOPS 12000
+#define PEAK_MEMORY 360
+
+void test_matmul(int argc, char *argv[]){
 
     int n = atoi(argv[1]);
     int m = atoi(argv[2]);
@@ -157,7 +161,7 @@ void test_cuda_matmul(int argc, char *argv[]){
     Tensor *r_cpu = r->to_cpu();
 
     std::uint64_t flops = (((2*n*k)/(1e6))*m)/1e3;
-    std::uint64_t memory = ((m*n + m*k)*4);
+    std::uint64_t memory = ((m*n + m*k)*4) + ((m*k)*4);
 
     const float peak_memory_bw = 76.8;
     const float peak_flops = 1881;
@@ -174,7 +178,7 @@ void test_cuda_matmul(int argc, char *argv[]){
         std::cout << *r_cpu << std::endl;
     }
 
-    std::cout << "Time Taken: " << seconds.count() << " Flops bound: " << flops/(peak_flops*1024) << ", Memory bound: " << memory/(peak_memory_bw*1e9) << std::endl; 
+    std::cout << "Time Taken: " << seconds.count() << " Flops bound: " << flops/(PEAK_FLOPS*1024) << ", Memory bound: " << memory/(PEAK_MEMORY*1e9) << std::endl; 
     std::cout << "Flops: " << flops/seconds.count() << std::endl;
 }
 
@@ -268,12 +272,5 @@ void test_multi_head_attention(int argc, char *argv[]) {
 #endif
 
 int main(int argc, char *argv[]) {
-    // #ifdef AVX
-    // test_matmul(argc, argv);
-    // #endif 
-
-    // #ifdef CUDA
-    // test_cuda_dotproduct_attention(argc, argv);
-    // #endif
     test_multi_head_attention(argc, argv);
 }

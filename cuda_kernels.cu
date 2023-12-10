@@ -84,3 +84,36 @@ __global__ void mm_coalescing(int M, int K, int N, int block_size,
         C[x * N + y] = tmp;
     }
 }
+
+// template <int SharedSize>
+// __global__ void mm_blocking(int M, int K, int N, int block_size,
+//                    float *A, const float *B, float *C) {     
+//     __shared__ float As[SHAREMEM_SIZE*SHAREMEM_SIZE];
+//     __shared__ float Bs[SHAREMEM_SIZE*SHAREMEM_SIZE];                           
+//     const int x = blockIdx.x * block_size + threadIdx.x;
+//     const int y = blockIdx.y * block_size + threadIdx.y;
+//     A += blockIdx.y*block_size*K;
+//     B += blockIdx.x*block_size;
+//     C += blockIdx.y*block_size*N + blockIdx.x*block_size;
+
+//     float temp=0;
+
+//     for(int shrblk=0; shrblk < K; shrblk+=block_size){
+//         As[threadIdx.y*block_size + threadIdx.x] = A[threadIdx.y*K + threadIdx.x];
+//         Bs[threadIdx.y*block_size + threadIdx.x] = B[threadIdx.y*N + threadIdx.x];
+//         __syncthreads();
+
+//         A += block_size;
+//         B += N*block_size;
+
+//         for (int dotIdx = 0; dotIdx < block_size; ++dotIdx) {
+//             temp += As[threadIdx.y*block_size + dotIdx] * Bs[dotIdx*block_size + threadIdx.x];
+//         }
+//     }
+
+//     if (x < M && y < N) {
+//         C[threadIdx.y*N + threadIdx.x] += temp;
+//     }
+// }
+// template __global__ void mm_blocking<256>(int M, int K, int N, int block_size,
+//                                           float *A, const float *B, float *C);
